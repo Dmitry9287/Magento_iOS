@@ -17,6 +17,8 @@
 
 @implementation MasterViewController
 
+@synthesize orders;
+
 - (void)awakeFromNib
 {
     [super awakeFromNib];
@@ -26,6 +28,14 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+    
+    NSURL *urlMagento = [NSURL URLWithString:@"http://local.magento17mod/restclient.php"];
+    
+    NSData *dataOrders =[[NSData alloc] initWithContentsOfURL:urlMagento];
+    
+    NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:dataOrders options:0 error:nil];
+    
+    self.orders = [dataDictionary objectForKey:@"orders"];
     
 }
 
@@ -54,15 +64,24 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return _objects.count;
+    return self.orders.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"Cell" forIndexPath:indexPath];
 
-    NSDate *object = _objects[indexPath.row];
-    cell.textLabel.text = [object description];
+//    NSDate *object = _objects[indexPath.row];
+//    cell.textLabel.text = [object description];
+
+    NSDictionary *order = [self.orders objectAtIndex:indexPath.row];
+    
+    NSString *stringText = [NSString stringWithFormat:@" %@ - US$ %@ ",[order valueForKey:@"increment_id"],[order valueForKey:@"grand_total"]];
+    
+    cell.textLabel.text = stringText;
+    
+    cell.detailTextLabel.text = [order valueForKey:@"name"];
+    
     return cell;
 }
 
